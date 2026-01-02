@@ -19,16 +19,16 @@ if not exist "adb\adb.exe" (
     set ADB_ZIP=platform-tools-latest-windows.zip
     set ADB_URL=https://dl.google.com/android/repository/platform-tools-latest-windows.zip
 
-    powershell -Command ^
-        "Invoke-WebRequest -Uri '%ADB_URL%' -OutFile '%ADB_ZIP%'"
+    powershell -NoProfile -Command ^
+        "Invoke-WebRequest -Uri '!ADB_URL!' -OutFile '!ADB_ZIP!'"
 
     if errorlevel 1 (
         echo ERROR: Failed to download ADB
         exit /b 1
     )
 
-    powershell -Command ^
-        "Expand-Archive -Force '%ADB_ZIP%' ."
+    powershell -NoProfile -Command ^
+        "Expand-Archive -Force '!ADB_ZIP!' ."
 
     if errorlevel 1 (
         echo ERROR: Failed to extract ADB
@@ -36,7 +36,7 @@ if not exist "adb\adb.exe" (
     )
 
     rename platform-tools adb
-    del "%ADB_ZIP%"
+    del "!ADB_ZIP!"
 )
 
 set ADB=adb\adb.exe
