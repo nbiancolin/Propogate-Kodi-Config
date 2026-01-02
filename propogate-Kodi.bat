@@ -4,6 +4,8 @@ setlocal EnableExtensions EnableDelayedExpansion
 set SRC_IP=%1
 set DST_IP=%2
 
+set "SCRIPT_DIR=%~dp0"
+
 if "%SRC_IP%"=="" (
     echo ERROR: Missing source IP
     exit /b 1
@@ -39,15 +41,18 @@ if not exist "adb\adb.exe" (
     del "!ADB_ZIP!"
 )
 
+if not exist "adb\adb.exe" (
+    echo ERROR: ADB extraction failed
+    exit /b 1
+)
+
+
 set ADB=adb\adb.exe
 
-REM ============================
-REM Start work
-REM ============================
 echo Propagating Kodi settings from %SRC_IP% to %DST_IP%...
 
 REM ----- Pull from source -----
-call helpers\adb_helpers.bat connect_and_verify %SRC_IP%
+call "%SCRIPT_DIR%helpers\adb_helpers.bat" connect_and_verify %SRC_IP%
 if errorlevel 1 (
     echo ERROR: Source connection failed
     exit /b 1
@@ -65,7 +70,7 @@ if errorlevel 1 (
 %ADB% disconnect
 
 REM ----- Push to destination -----
-call helpers\adb_helpers.bat connect_and_verify %DST_IP%
+call "%SCRIPT_DIR%helpers\adb_helpers.bat" connect_and_verify %DST_IP%
 if errorlevel 1 (
     echo ERROR: Destination connection failed
     exit /b 1
