@@ -1,1 +1,0 @@
-REM Script to check that your computer can connect via ADB
