@@ -22,11 +22,12 @@ if errorlevel 1 (
 )
 
 
-set ADB=adb\adb.exe
+set "ADB=%SCRIPT_DIR%adb\adb.exe"
 
 echo Propagating Kodi settings from %SRC_IP% to %DST_IP%...
 
 REM ----- Pull from source -----
+set "ADB=%SCRIPT_DIR%adb\adb.exe"
 call "%SCRIPT_DIR%helpers\adb_helpers.bat" connect_and_verify %SRC_IP%
 if errorlevel 1 (
     echo ERROR: Source connection failed
@@ -36,28 +37,29 @@ if errorlevel 1 (
 if exist temp rmdir /s /q temp
 mkdir temp
 
-%ADB% pull /sdcard/Android/data/org.xbmc.kodi/files/.kodi temp\.kodi
+"%ADB%" pull /sdcard/Android/data/org.xbmc.kodi/files/.kodi temp\.kodi
 if errorlevel 1 (
     echo ERROR: Failed to pull Kodi data
     exit /b 1
 )
 
-%ADB% disconnect
+"%ADB%" disconnect
 
 REM ----- Push to destination -----
+set "ADB=%SCRIPT_DIR%adb\adb.exe"
 call "%SCRIPT_DIR%helpers\adb_helpers.bat" connect_and_verify %DST_IP%
 if errorlevel 1 (
     echo ERROR: Destination connection failed
     exit /b 1
 )
 
-%ADB% push temp\.kodi /sdcard/Android/data/org.xbmc.kodi/files/
+"%ADB%" push temp\.kodi /sdcard/Android/data/org.xbmc.kodi/files/
 if errorlevel 1 (
     echo ERROR: Failed to push Kodi data
     exit /b 1
 )
 
-%ADB% disconnect
+"%ADB%" disconnect
 
 echo Kodi config data successfully transferred. Have a nice day!
 exit /b 0
