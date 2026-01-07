@@ -1,8 +1,12 @@
-# To add firesticks, label them FIRESTICK_{#}_... and add DISPLAYNAME and either HOSTNAME or IP_ADDR
-
-# eg.
-
-FIRESTICK_1_DISPLAYNAME="Living Room Firestick"
-FIRESTICK_1_HOSTNAME="Android-4"
-# or:
-FIRESTICK_1_IP_ADDR="192.168.67.67"
+# To add firesticks, add them to the [firesticks] section with format:
+# DeviceName=hostname
+#
+# The hostname will be resolved to an IP address automatically.
+# You can use either a network hostname (e.g., android-4) or an IP address.
+#
+# Examples:
+[firesticks]
+LivingRoom=android-4
+Basement=android-5
+# Or with IP addresses (still supported):
+# Office=192.168.1.100
