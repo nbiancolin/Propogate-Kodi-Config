@@ -15,34 +15,9 @@ if "%DST_IP%"=="" (
     exit /b 1
 )
 
-if not exist "adb\adb.exe" (
-    echo ADB not found. Downloading platform-tools...
-
-    set ADB_ZIP=platform-tools-latest-windows.zip
-    set ADB_URL=https://dl.google.com/android/repository/platform-tools-latest-windows.zip
-
-    powershell -NoProfile -Command ^
-        "Invoke-WebRequest -Uri '!ADB_URL!' -OutFile '!ADB_ZIP!'"
-
-    if errorlevel 1 (
-        echo ERROR: Failed to download ADB
-        exit /b 1
-    )
-
-    powershell -NoProfile -Command ^
-        "Expand-Archive -Force '!ADB_ZIP!' ."
-
-    if errorlevel 1 (
-        echo ERROR: Failed to extract ADB
-        exit /b 1
-    )
-
-    rename platform-tools adb
-    del "!ADB_ZIP!"
-)
-
-if not exist "adb\adb.exe" (
-    echo ERROR: ADB extraction failed
+call "%SCRIPT_DIR%helpers\download_adb.bat" "%SCRIPT_DIR%"
+if errorlevel 1 (
+    echo ERROR: Failed to download or extract ADB
     exit /b 1
 )
 
