@@ -1,2 +1,4 @@
 *.ini
 adb/*
+.venv/
+__pycache__/
