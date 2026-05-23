@@ -15,7 +15,8 @@ The Python version is the recommended entry point: core logic is separated from 
 
 ## Prerequisites
 
-- Windows with Python 3.10 or newer
+- Windows 10 or 11
+- Python 3.10 or newer (only if running from source; not needed for the pre-built exe)
 - Fire TV devices with **ADB debugging** enabled (Settings → My Fire TV → Developer Options)
 - Devices reachable on your network (hostname or IP in `config.ini`)
 
@@ -47,7 +48,17 @@ The Python version is the recommended entry point: core logic is separated from 
 
    On first run, platform-tools are downloaded to **`adb/` in the repository root** (next to `main.py`), not under `src/`. A temporary `temp/` folder for transfers is also created at the root during propagation.
 
-## Running
+## Pre-built Windows exe
+
+GitHub Actions builds a standalone `Propogate-Kodi-Config.exe` on every push to `main` and on pull requests. Download it from the **Actions** tab → latest workflow run → **Artifacts** (`Propogate-Kodi-Config-windows` includes the exe and a zip with `config.ini.sample`).
+
+1. Unzip the artifact (or copy the exe to a folder of your choice).
+2. Copy `config.ini.sample` to `config.ini` in the **same folder as the exe** and edit your devices.
+3. Run `Propogate-Kodi-Config.exe` (double-click or from PowerShell).
+
+On first run, platform-tools download to **`adb/` next to the exe**. A `temp/` folder may appear during propagation and is removed afterward.
+
+## Running from source
 
 With the virtual environment activated:
 
@@ -104,9 +115,10 @@ You can run commands through the venv interpreter directly:
 
 | Path | Role |
 |------|------|
-| `main.py` | CLI entry point (run from repo root) |
-| `config.ini` | Your device list (repo root; copy from `config.ini.sample`) |
-| `adb/` | Downloaded platform-tools (repo root; created on first run) |
-| `temp/` | Staging folder during propagation (repo root; removed after run) |
+| `main.py` | CLI entry point when running from source (repo root) |
+| `Propogate-Kodi-Config.exe` | Standalone build (same folder layout as repo root for config/data) |
+| `config.ini` | Your device list (next to `main.py` or the exe; copy from `config.ini.sample`) |
+| `adb/` | Downloaded platform-tools (next to `main.py` or the exe; created on first run) |
+| `temp/` | Staging folder during propagation (removed after run) |
 | `src/kodi_config/` | Python package source |
 | `tests/` | Pytest suite |

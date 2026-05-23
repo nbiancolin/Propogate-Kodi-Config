@@ -15,7 +15,10 @@ class Device:
 def load_devices(config_path: Path) -> list[Device]:
     """Load devices from the [firesticks] section of config.ini."""
     if not config_path.is_file():
-        raise FileNotFoundError(f"config.ini not found: {config_path}")
+        raise FileNotFoundError(
+            f"config.ini not found at {config_path}. "
+            "Copy config.ini.sample to config.ini in the same folder as the program."
+        )
 
     parser = configparser.ConfigParser()
     parser.optionxform = str  # preserve device name casing from config.ini

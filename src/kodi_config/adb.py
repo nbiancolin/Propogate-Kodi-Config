@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import socket
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 from urllib.request import urlretrieve
@@ -25,13 +26,20 @@ class HostnameResolutionError(AdbError):
 
 
 def project_root() -> Path:
-    """Repository root (where main.py, config.ini, and adb/ live)."""
+    """Directory for config.ini, adb/, and temp/ (repo root or folder containing the exe)."""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
     for directory in Path(__file__).resolve().parents:
         if (directory / "main.py").is_file():
             return directory
     raise RuntimeError(
         "Could not locate project root. Run from the repo that contains main.py."
     )
+
+
+def config_ini_path(root: Path | None = None) -> Path:
+    """Path to the user-editable config.ini (always beside main.py or the exe)."""
+    return (root or project_root()) / "config.ini"
 
 
 def adb_executable(root: Path | None = None) -> Path:

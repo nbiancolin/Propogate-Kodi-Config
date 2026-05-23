@@ -1,4 +1,5 @@
 import socket
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -7,6 +8,7 @@ import pytest
 from kodi_config.adb import (
     HostnameResolutionError,
     adb_executable,
+    config_ini_path,
     connect_and_verify,
     ensure_adb,
     is_device_connected,
@@ -22,6 +24,31 @@ def test_project_root_is_repository_root() -> None:
     assert (root / "main.py").is_file()
     assert (root / "config.ini.sample").is_file()
     assert adb_executable(root) == root / "adb" / "adb.exe"
+
+
+def test_project_root_when_frozen(tmp_path: Path) -> None:
+    fake_exe = tmp_path / "Propogate-Kodi-Config.exe"
+    fake_exe.write_text("", encoding="utf-8")
+    with (
+        patch.object(sys, "frozen", True, create=True),
+        patch.object(sys, "executable", str(fake_exe)),
+    ):
+        assert project_root() == tmp_path
+
+
+def test_config_ini_path_beside_exe_when_frozen(tmp_path: Path) -> None:
+    fake_exe = tmp_path / "Propogate-Kodi-Config.exe"
+    fake_exe.write_text("", encoding="utf-8")
+    with (
+        patch.object(sys, "frozen", True, create=True),
+        patch.object(sys, "executable", str(fake_exe)),
+    ):
+        assert config_ini_path() == tmp_path / "config.ini"
+
+
+def test_config_ini_path_beside_project_root() -> None:
+    root = project_root()
+    assert config_ini_path(root) == root / "config.ini"
 
 
 def test_resolve_hostname_returns_ipv4_unchanged() -> None:

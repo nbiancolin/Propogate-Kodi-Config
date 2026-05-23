@@ -8,6 +8,7 @@ from kodi_config.adb import (
     AdbError,
     HostnameResolutionError,
     adb_executable,
+    config_ini_path,
     disconnect,
     ensure_adb,
     is_device_connected,
@@ -114,11 +115,10 @@ def run_propagate_flow(devices: list[Device]) -> None:
 
 def main_menu(root: Path | None = None) -> int:
     root = root or project_root()
-    config_path = root / "config.ini"
 
     try:
         ensure_adb(root)
-        devices = load_devices(config_path)
+        devices = load_devices(config_ini_path(root))
     except (AdbError, FileNotFoundError, ValueError) as exc:
         print(f"ERROR: {exc}")
         return 1
