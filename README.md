@@ -294,9 +294,9 @@ Without activating the venv:
 
 The workflow runs **only when you start it** (not on every push).
 
-1. On GitHub, open **Actions** → **Build Windows exe** → **Run workflow**.
-2. Leave **release tag** blank to build and download artifacts only, or enter e.g. `v1.0.0` to publish a [Release](https://github.com/nbiancolin/Propogate-Kodi-Config/releases) with the exe attached.
-3. When the run finishes, download **Propogate-Kodi-Config-windows** from that run’s **Artifacts** (or from **Releases** if you set a tag).
+1. On GitHub, open **Actions** → **Build Windows exe** → **Run workflow** (pick the branch with the commit you want, usually `main`).
+2. When the run finishes, open the new entry on [Releases](https://github.com/nbiancolin/Propogate-Kodi-Config/releases). Each run creates a tag on that commit (e.g. `v1.0.0-build.42`, from `pyproject.toml` version + run number) and attaches the exe and zip.
+3. Artifacts are also on the workflow run under **Propogate-Kodi-Config-windows**.
 
 
 
