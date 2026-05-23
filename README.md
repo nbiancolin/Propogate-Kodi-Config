@@ -1,131 +1,329 @@
 # Propogate-Kodi-Config
 
-Windows utility to clone Kodi configs between Fire TV sticks over ADB.
 
-The Python version is the recommended entry point: core logic is separated from the interactive menu so it can be unit-tested without hardware.
 
-## Prerequisites
+Clone Kodi settings between Fire TV sticks on your home network. **Most people should use the pre-built Windows exe** — no Python install required.
 
-- Windows 10 or 11
-- Python 3.10 or newer (only if running from source; not needed for the pre-built exe)
-- Fire TV devices with **ADB debugging** enabled (Settings → My Fire TV → Developer Options)
-- Devices reachable on your network (hostname or IP in `config.ini`)
 
-## Setup
 
-1. Copy `config.ini.sample` to `config.ini` and add your devices under `[firesticks]`:
+---
 
-   ```ini
-   [firesticks]
-   LivingRoom=android-4
-   Basement=192.168.1.50
-   ```
 
-   Use a network hostname (e.g. `android-4`) or an IP address. Hostnames are resolved automatically.
 
-2. Create and activate a virtual environment, then install dependencies:
+## How to use the Windows exe
 
-   ```powershell
-   cd path\to\Propogate-Kodi-Config
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   pip install -r requirements-dev.txt
-   pip install -e .
-   ```
 
-   The Python package lives under `src/kodi_config/` only (there is no duplicate at the repo root).
 
-   Place `config.ini` in the **repository root** (next to `main.py`), not under `src/`.
+### Step 1 — Download
 
-   On first run, platform-tools are downloaded to **`adb/` in the repository root** (next to `main.py`), not under `src/`. A temporary `temp/` folder for transfers is also created at the root during propagation.
 
-## Pre-built Windows exe
 
-Tagged releases (`v*`, e.g. `v1.0.0`) publish `Propogate-Kodi-Config.exe` on the [Releases](https://github.com/nbiancolin/Propogate-Kodi-Config/releases) page. CI builds on every push to `main` as well; download artifacts from **Actions** → latest run → **Propogate-Kodi-Config-windows**.
+Get the latest build from **[Releases](https://github.com/nbiancolin/Propogate-Kodi-Config/releases)**.
 
-### Configuration (exe)
 
-The exe reads **`config.ini` from the same folder as the executable** at runtime (not from inside the exe or a system directory). Edit that file any time; changes apply on the next launch.
 
-1. Download the release zip or exe (the zip includes `config.ini.sample`).
-2. Put `Propogate-Kodi-Config.exe` in a folder you control (e.g. `C:\Tools\Propogate-Kodi-Config\`).
-3. Copy `config.ini.sample` to **`config.ini` in that same folder** and add your Fire TV devices.
-4. Run `Propogate-Kodi-Config.exe`.
+- Download **`Propogate-Kodi-Config-windows.zip`** (recommended — includes a sample config), or  
 
-On first run, platform-tools download to **`adb/` next to the exe**. A `temp/` folder may appear during propagation and is removed afterward.
+- Download **`Propogate-Kodi-Config.exe`** only.
 
-### Publishing a release
 
-From a commit on `main`:
 
-```powershell
-git tag v1.0.0
-git push origin v1.0.0
+### Step 2 — Put files in one folder
+
+
+
+Create a folder anywhere you like, for example:
+
+
+
+`C:\Tools\Propogate-Kodi-Config\`
+
+
+
+Unzip or copy into that folder so it contains at least:
+
+
+
 ```
 
-GitHub Actions runs tests, builds the exe, and attaches it to a new GitHub Release for that tag.
+C:\Tools\Propogate-Kodi-Config\
 
-## Running from source
+  Propogate-Kodi-Config.exe
 
-With the virtual environment activated:
+  config.ini.sample
+
+```
+
+
+
+**Important:** `config.ini` must live in the **same folder as the exe**, not in Downloads, not inside the zip forever, and not in `Program Files` unless you are okay editing config there.
+
+
+
+### Step 3 — Create your config
+
+
+
+1. Copy `config.ini.sample` → rename the copy to **`config.ini`** (same folder as the exe).
+
+2. Open `config.ini` in Notepad and list your Fire TVs under `[firesticks]`:
+
+
+
+   ```ini
+
+   [firesticks]
+
+   LivingRoom=android-4
+
+   Basement=192.168.1.50
+
+   ```
+
+
+
+   Use each stick’s network name (e.g. `android-4`) or its IP address. You can edit this file anytime; restart the program to pick up changes.
+
+
+
+### Step 4 — Prepare your Fire TVs (once per device)
+
+
+
+On each Fire TV: **Settings → My Fire TV → Developer Options → ADB debugging** → **On**.
+
+
+
+The TV must be on the same network as your PC.
+
+
+
+### Step 5 — Run the program
+
+
+
+Double-click **`Propogate-Kodi-Config.exe`**, or from PowerShell:
+
+
+
+```powershell
+
+cd C:\Tools\Propogate-Kodi-Config
+
+.\Propogate-Kodi-Config.exe
+
+```
+
+
+
+**First run only:** the app downloads Android platform-tools into an `adb` folder next to the exe. You need internet once for that.
+
+
+
+### Step 6 — Use the menu
+
+
+
+| Option | What it does |
+
+|--------|----------------|
+
+| **1. Test connection** | Connects to one device to check it is reachable and authorized. |
+
+| **2. Propagate Kodi config** | Copies Kodi data from one Fire TV to another (you pick source and destination). |
+
+| **3. Exit** | Closes the program. |
+
+
+
+If propagation fails, check that both TVs have ADB debugging on and that you accepted any “Allow USB debugging?” prompt on the TV.
+
+
+
+### Troubleshooting
+
+
+
+| Problem | What to try |
+
+|---------|-------------|
+
+| `config.ini not found` | Create `config.ini` in the **same folder as the exe** (copy from `config.ini.sample`). |
+
+| Cannot connect to a device | Confirm ADB debugging is on, the TV is on the network, and the name/IP in `config.ini` is correct. |
+
+| “Not authorized” | On the Fire TV, accept the debugging authorization prompt, then run **Test connection** again. |
+
+
+
+### What gets created next to the exe
+
+
+
+| File or folder | Purpose |
+
+|----------------|---------|
+
+| `config.ini` | **You create this** — your device list |
+
+| `adb\` | Downloaded automatically on first run |
+
+| `temp\` | Used during propagation; removed when finished |
+
+
+
+---
+
+
+
+## Prerequisites (all users)
+
+
+
+- **Windows 10 or 11**
+
+- Fire TV devices with **ADB debugging** enabled
+
+- PCs and Fire TVs on the **same network**
+
+
+
+Python is **not** required for the exe.
+
+
+
+---
+
+
+
+## Running from source (developers)
+
+
+
+### Setup
+
+
+
+1. Copy `config.ini.sample` to `config.ini` in the repo root and add devices under `[firesticks]` (same format as above).
+
+
+
+2. Create a virtual environment and install:
+
+
+
+   ```powershell
+
+   cd path\to\Propogate-Kodi-Config
+
+   python -m venv .venv
+
+   .\.venv\Scripts\Activate.ps1
+
+   pip install -r requirements-dev.txt
+
+   pip install -e .
+
+   ```
+
+
+
+   Place `config.ini` next to `main.py`. Platform-tools download to `adb/` next to `main.py` on first run.
+
+
 
 ### Interactive menu
 
-Run `main.py`. Lists devices from `config.ini` and offers:
 
-1. Test connection to a device  
-2. Propagate Kodi config between two devices  
-3. Exit  
 
 ```powershell
+
 python main.py
+
 ```
 
-### Direct propagation (two IPs)
 
-Skips the menu and copies Kodi data from source to destination:
+
+### Direct propagation (two addresses, no menu)
+
+
 
 ```powershell
+
 python main.py 192.168.1.10 192.168.1.20
-```
 
-Hostnames work as well if they resolve on your network:
-
-```powershell
 python main.py android-4 android-5
+
 ```
 
-### Run tests
 
-No Fire TV or ADB connection required; ADB calls are mocked in tests.
+
+### Tests
+
+
 
 ```powershell
+
 pytest
-```
 
-Verbose output:
-
-```powershell
 pytest -v
+
 ```
 
-### Without activating the venv
 
-You can run commands through the venv interpreter directly:
+
+Without activating the venv:
+
+
 
 ```powershell
+
 .\.venv\Scripts\python.exe main.py
+
 .\.venv\Scripts\pytest.exe
+
 ```
+
+
+
+---
+
+
+
+## Building and publishing (maintainers)
+
+The workflow runs **only when you start it** (not on every push).
+
+1. On GitHub, open **Actions** → **Build Windows exe** → **Run workflow**.
+2. Leave **release tag** blank to build and download artifacts only, or enter e.g. `v1.0.0` to publish a [Release](https://github.com/nbiancolin/Propogate-Kodi-Config/releases) with the exe attached.
+3. When the run finishes, download **Propogate-Kodi-Config-windows** from that run’s **Artifacts** (or from **Releases** if you set a tag).
+
+
+
+---
+
+
 
 ## Project layout
 
+
+
 | Path | Role |
+
 |------|------|
-| `main.py` | CLI entry point when running from source (repo root) |
-| `Propogate-Kodi-Config.exe` | Standalone build (same folder layout as repo root for config/data) |
-| `config.ini` | Your device list (next to `main.py` or the exe; copy from `config.ini.sample`) |
-| `adb/` | Downloaded platform-tools (next to `main.py` or the exe; created on first run) |
-| `temp/` | Staging folder during propagation (removed after run) |
+
+| `Propogate-Kodi-Config.exe` | Standalone app — keep `config.ini` beside it |
+
+| `config.ini` | Your device list (copy from `config.ini.sample`) |
+
+| `adb/` | Downloaded platform-tools (created on first run) |
+
+| `temp/` | Staging during propagation (removed after run) |
+
+| `main.py` | Entry point when running from source |
+
 | `src/kodi_config/` | Python package source |
+
 | `tests/` | Pytest suite |
+
+

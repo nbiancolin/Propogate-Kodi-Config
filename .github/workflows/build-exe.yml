@@ -1,11 +1,12 @@
 name: Build Windows exe
 
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
-  pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Optional GitHub Release tag (e.g. v1.0.0). Leave blank to build artifacts only."
+        required: false
+        type: string
 
 jobs:
   test:
@@ -65,7 +66,7 @@ jobs:
           path: release/
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: inputs.release_tag != ''
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -79,6 +80,8 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.release_tag }}
+          name: ${{ inputs.release_tag }}
           generate_release_notes: true
           files: |
             release/Propogate-Kodi-Config.exe
