@@ -298,6 +298,8 @@ The workflow runs **only when you start it** (not on every push).
 2. When the run finishes, open the new entry on [Releases](https://github.com/nbiancolin/Propogate-Kodi-Config/releases). Each run creates a tag on that commit (e.g. `v1.0.0-build.42`, from `pyproject.toml` version + run number) and attaches the exe and zip.
 3. Artifacts are also on the workflow run under **Propogate-Kodi-Config-windows**.
 
+**Customize release notes:** edit [`.github/RELEASE_NOTES.md`](.github/RELEASE_NOTES.md) in the repo. That file is copied into every GitHub Release description when you run the workflow.
+
 
 
 ---

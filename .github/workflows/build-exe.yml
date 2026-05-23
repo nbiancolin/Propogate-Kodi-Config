@@ -85,13 +85,22 @@ jobs:
           name: Propogate-Kodi-Config-windows
           path: release
 
+      - name: Prepare release notes
+        run: |
+          {
+            echo "**Build:** \`${{ steps.meta.outputs.tag }}\`"
+            echo "**Commit:** \`${GITHUB_SHA::7}\`"
+            echo ""
+            cat .github/RELEASE_NOTES.md
+          } > release-notes.md
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
           name: ${{ steps.meta.outputs.name }}
           target_commitish: ${{ github.sha }}
-          generate_release_notes: true
+          body_path: release-notes.md
           files: |
             release/Propogate-Kodi-Config.exe
             release/Propogate-Kodi-Config-windows.zip
