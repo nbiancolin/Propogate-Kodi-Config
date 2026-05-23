@@ -6,12 +6,22 @@ import pytest
 
 from kodi_config.adb import (
     HostnameResolutionError,
+    adb_executable,
     connect_and_verify,
     ensure_adb,
     is_device_connected,
+    project_root,
     resolve_hostname,
     run_adb,
 )
+
+
+def test_project_root_is_repository_root() -> None:
+    root = project_root()
+    assert root.name != "src"
+    assert (root / "main.py").is_file()
+    assert (root / "config.ini.sample").is_file()
+    assert adb_executable(root) == root / "adb" / "adb.exe"
 
 
 def test_resolve_hostname_returns_ipv4_unchanged() -> None:

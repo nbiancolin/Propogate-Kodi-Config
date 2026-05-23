@@ -1,3 +1,12 @@
+Metadata-Version: 2.4
+Name: propogate-kodi-config
+Version: 1.0.0
+Summary: Clone Kodi configs between Fire TV devices via ADB
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
 # Propogate-Kodi-Config
 
 Windows utility to clone Kodi configs between Fire TV sticks over ADB.

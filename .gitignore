@@ -1,4 +1,8 @@
 *.ini
 adb/*
+temp/
 .venv/
 __pycache__/
+src/adb/
+src/platform-tools/
+src/platform-tools-*.zip

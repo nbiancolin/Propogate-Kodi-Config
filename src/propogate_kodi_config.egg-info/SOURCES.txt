@@ -1,0 +1,15 @@
+LICENSE
+README.md
+pyproject.toml
+src/kodi_config/__init__.py
+src/kodi_config/adb.py
+src/kodi_config/cli.py
+src/kodi_config/config.py
+src/kodi_config/propagate.py
+src/propogate_kodi_config.egg-info/PKG-INFO
+src/propogate_kodi_config.egg-info/SOURCES.txt
+src/propogate_kodi_config.egg-info/dependency_links.txt
+src/propogate_kodi_config.egg-info/top_level.txt
+tests/test_adb.py
+tests/test_config.py
+tests/test_propagate.py

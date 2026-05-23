@@ -25,7 +25,13 @@ class HostnameResolutionError(AdbError):
 
 
 def project_root() -> Path:
-    return Path(__file__).resolve().parent.parent
+    """Repository root (where main.py, config.ini, and adb/ live)."""
+    for directory in Path(__file__).resolve().parents:
+        if (directory / "main.py").is_file():
+            return directory
+    raise RuntimeError(
+        "Could not locate project root. Run from the repo that contains main.py."
+    )
 
 
 def adb_executable(root: Path | None = None) -> Path:
