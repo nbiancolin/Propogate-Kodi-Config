@@ -9,12 +9,11 @@ from kodi_config.adb import (
     HostnameResolutionError,
     adb_executable,
     config_ini_path,
+    connect_and_verify,
     disconnect,
     ensure_adb,
-    is_device_connected,
     project_root,
     resolve_hostname,
-    run_adb,
 )
 from kodi_config.config import Device, load_devices, parse_menu_choice
 from kodi_config.propagate import propagate_kodi
@@ -49,25 +48,16 @@ def test_connection(device: Device, adb_path: Path) -> None:
     print(f"Resolved to IP: {ip}")
     print(f"\nConnecting to {device.name} ({device.hostname} - {ip})...")
 
-    run_adb(adb_path, "disconnect", check=False)
-    result = run_adb(adb_path, "connect", ip, check=False)
-    if result.returncode != 0:
-        print(f"ERROR: Failed to connect to {device.name}")
+    try:
+        connect_and_verify(adb_path, device.hostname)
+        print(f"Successfully connected to {device.name}!")
+    except AdbError as exc:
+        print(f"ERROR: {exc}")
         return
 
-    time.sleep(2)
-
-    if is_device_connected(adb_path, ip):
-        print(f"Successfully connected to {device.name}!")
-    else:
-        print("WARNING: Device connected but may not be authorized")
-
     print("\nDisconnecting...")
-    result = run_adb(adb_path, "disconnect", ip, check=False)
-    if result.returncode != 0:
-        print("WARNING: Failed to disconnect cleanly")
-    else:
-        print("Disconnected successfully.")
+    disconnect(adb_path, device.hostname)
+    print("Disconnected successfully.")
 
 
 def run_propagate_flow(devices: list[Device]) -> None:

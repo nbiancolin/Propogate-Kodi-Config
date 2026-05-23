@@ -3,6 +3,7 @@ from __future__ import annotations
 import socket
 import subprocess
 import sys
+import time
 import zipfile
 from pathlib import Path
 from urllib.request import urlretrieve
@@ -13,6 +14,9 @@ ADB_DOWNLOAD_URL = (
     "https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
 )
 KODI_REMOTE_PATH = "/sdcard/Android/data/org.xbmc.kodi/files/.kodi"
+ADB_CONNECT_PORT = 5555
+CONNECT_POLL_TIMEOUT_SECONDS = 10.0
+CONNECT_POLL_INTERVAL_SECONDS = 0.5
 
 
 class AdbError(Exception):
@@ -109,35 +113,104 @@ def run_adb(adb: Path, *args: str, check: bool = True) -> subprocess.CompletedPr
     return result
 
 
-def connect_and_verify(adb: Path, target: str) -> None:
-    """Connect to a device over the network and verify it is authorized."""
-    address = resolve_hostname(target)
-    run_adb(adb, "disconnect", check=False)
-    run_adb(adb, "connect", address)
+def adb_connect_target(address: str) -> str:
+    """Address passed to ``adb connect`` (Fire TV network debugging uses port 5555)."""
+    address = address.strip()
+    if ":" in address:
+        return address
+    if is_ipv4_address(address):
+        return f"{address}:{ADB_CONNECT_PORT}"
+    return address
 
+
+def adb_host_from_serial(serial: str) -> str:
+    """Normalize ``adb devices`` serial (e.g. ``10.0.0.5:5555``) to a host for comparison."""
+    if serial.count(":") == 1:
+        host, port = serial.rsplit(":", 1)
+        if port.isdigit():
+            return host
+    return serial
+
+
+def serial_matches_address(serial: str, address: str) -> bool:
+    """True when an ``adb devices`` line refers to the same host as ``address``."""
+    resolved = resolve_hostname(address)
+    return serial == resolved or serial == adb_connect_target(resolved) or (
+        adb_host_from_serial(serial) == adb_host_from_serial(resolved)
+    )
+
+
+def list_device_states(adb: Path) -> dict[str, str]:
+    """Map ``adb devices`` serials to states (``device``, ``unauthorized``, etc.)."""
     devices = run_adb(adb, "devices", check=False)
+    states: dict[str, str] = {}
     for line in devices.stdout.splitlines():
         parts = line.split()
-        if len(parts) >= 2 and parts[0] == address and parts[1] == "device":
-            return
+        if len(parts) >= 2 and parts[0] != "List":
+            states[parts[0]] = parts[1]
+    return states
 
-    raise AdbError(f"Device {address} not connected or not authorized")
+
+def device_state(adb: Path, address: str) -> str | None:
+    """Return the ``adb devices`` state for ``address``, or ``None`` if not listed."""
+    for serial, state in list_device_states(adb).items():
+        if serial_matches_address(serial, address):
+            return state
+    return None
+
+
+def connect_and_verify(adb: Path, target: str) -> str:
+    """Connect to a device over the network and verify it is authorized.
+
+    Returns the resolved host/IP. Raises ``AdbError`` on failure.
+    """
+    address = resolve_hostname(target)
+    connect_target = adb_connect_target(address)
+
+    run_adb(adb, "disconnect", check=False)
+    result = run_adb(adb, "connect", connect_target, check=False)
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        raise AdbError(detail or f"adb connect {connect_target} failed")
+
+    deadline = time.monotonic() + CONNECT_POLL_TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        state = device_state(adb, address)
+        if state == "device":
+            return address
+        if state == "unauthorized":
+            raise AdbError(
+                f"Device {address} is connected but not authorized. "
+                "On the Fire TV, accept the ADB debugging prompt and try again."
+            )
+        time.sleep(CONNECT_POLL_INTERVAL_SECONDS)
+
+    states = list_device_states(adb)
+    listed = [
+        f"{serial} ({state})"
+        for serial, state in states.items()
+        if serial_matches_address(serial, address)
+    ]
+    if listed:
+        detail = ", ".join(listed)
+    elif states:
+        detail = f"adb devices: {states!r}"
+    else:
+        detail = "device not listed in adb devices"
+    raise AdbError(f"Device {address} not ready: {detail}")
 
 
 def disconnect(adb: Path, target: str | None = None) -> None:
     if target:
-        run_adb(adb, "disconnect", resolve_hostname(target), check=False)
+        address = resolve_hostname(target)
+        run_adb(adb, "disconnect", adb_connect_target(address), check=False)
+        run_adb(adb, "disconnect", address, check=False)
     else:
         run_adb(adb, "disconnect", check=False)
 
 
-def is_device_connected(adb: Path, ip: str) -> bool:
-    devices = run_adb(adb, "devices", check=False)
-    for line in devices.stdout.splitlines():
-        parts = line.split()
-        if len(parts) >= 2 and parts[0] == ip and parts[1] == "device":
-            return True
-    return False
+def is_device_connected(adb: Path, address: str) -> bool:
+    return device_state(adb, address) == "device"
 
 
 def pull_kodi_data(adb: Path, local_dir: Path) -> None:
